@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M_H_S movies - Streaming Platform</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            pink: '#ff007f',
+                            cyan: '#00f3ff',
+                            purple: '#9d00ff',
+                            dark: '#0a0a12',
+                            card: '#121220'
+                        }
+                    },
+                    boxShadow: {
+                        'neon-cyan': '0 0 15px rgba(0, 243, 255, 0.4)',
+                        'neon-pink': '0 0 15px rgba(255, 0, 127, 0.4)',
+                        'neon-purple': '0 0 20px rgba(157, 0, 255, 0.4)',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Orbitron:wght@500;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #07070e;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+        .font-cyber {
+            font-family: 'Orbitron', sans-serif;
+        }
+        .glass-panel {
+            background: rgba(18, 18, 32, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-panel-glow {
+            background: rgba(18, 18, 32, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a12;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f1f3a;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f3ff;
+        }
+        video::cue {
+            background-color: rgba(0, 0, 0, 0.75);
+            color: #00f3ff;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            text-shadow: 0 0 5px rgba(0, 243, 255, 0.8);
+            border-radius: 4px;
+            padding: 2px 8px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-cyber-pink selection:text-white">
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- TOP NAVIGATION BAR -->
+    <nav class="sticky top-0 z-40 glass-panel border-b border-slate-800/80 px-4 lg:px-8 py-3 transition-all duration-300">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            
+            <!-- Logo -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="filterCategory('All')">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyber-pink via-cyber-purple to-cyber-cyan p-[2px] flex items-center justify-center shadow-neon-pink">
+                    <div class="w-full h-full bg-cyber-dark rounded-[10px] flex items-center justify-center">
+                        <i class="fa-solid font-cyber text-transparent bg-clip-text bg-gradient-to-r from-cyber-cyan to-cyber-pink fa-play text-lg ml-0.5"></i>
+                    </div>
+                </div>
+                <span class="font-cyber text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-cyber-cyan">
+                    M_H_S <span class="text-cyber-pink">MOVIES</span>
+                </span>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="flex-1 max-w-md hidden md:block relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Search movies, anime, genre..." 
+                       class="w-full bg-slate-900/80 border border-slate-700/60 focus:border-cyber-cyan focus:ring-1 focus:ring-cyber-cyan text-sm text-slate-100 rounded-full pl-11 pr-4 py-2 outline-none transition-all duration-200 placeholder-slate-500">
+            </div>
+
+            <!-- Admin Button & Mobile Search Icon -->
+            <div class="flex items-center gap-3">
+                <button onclick="toggleMobileSearch()" class="md:hidden text-slate-300 hover:text-cyber-cyan p-2">
+                    <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                </button>
+                <button onclick="openAdminAuth()" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800/80 hover:bg-cyber-purple/30 border border-slate-700/80 hover:border-cyber-purple text-slate-200 hover:text-white transition-all duration-300 text-sm font-semibold shadow-lg group">
+                    <i class="fa-solid fa-user-shield text-cyber-cyan group-hover:text-cyber-pink transition-colors"></i>
+                    <span>Admin Panel</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Search Dropdown -->
+        <div id="mobileSearchContainer" class="hidden md:hidden pt-3 px-2 pb-1">
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="mobileSearchInput" oninput="handleSearch(true)" placeholder="Search movies..." 
+                       class="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl pl-11 pr-4 py-2.5 outline-none focus:border-cyber-cyan">
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-6 space-y-8">
+
+        <!-- HERO FEATURED BANNER -->
+        <div id="heroBanner" class="relative rounded-3xl overflow-hidden min-h-[380px] md:min-h-[460px] flex items-end p-6 md:p-12 border border-slate-800/60 shadow-2xl transition-all duration-500 bg-cover bg-center">
+            <!-- Overlay Gradient -->
+            <div class="absolute inset-0 bg-gradient-to-t from-cyber-dark via-cyber-dark/60 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-cyber-dark/90 via-cyber-dark/40 to-transparent"></div>
+
+            <!-- Hero Content -->
+            <div class="relative z-10 max-w-2xl space-y-4">
+                <div class="flex items-center gap-2">
+                    <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-cyber-pink/20 border border-cyber-pink/50 text-cyber-pink">
+                        Featured Movie
+                    </span>
+                    <span id="heroYear" class="text-xs font-semibold text-slate-300 bg-slate-800/80 px-2.5 py-1 rounded-md">2024</span>
+                    <span id="heroRating" class="text-xs font-bold text-yellow-400 bg-yellow-400/10 border border-yellow-400/30 px-2 py-1 rounded-md flex items-center gap-1">
+                        <i class="fa-solid fa-star"></i> 8.9
+                    </span>
+                </div>
+                <h1 id="heroTitle" class="text-3xl md:text-5xl font-extrabold text-white font-cyber tracking-tight drop-shadow-md">
+                    Cyberpunk 2077: Edgerunners
+                </h1>
+                <p id="heroDesc" class="text-slate-300 text-sm md:text-base line-clamp-3 leading-relaxed">
+                    A street kid trying to survive in a technology and body modification-obsessed city of the future. Having everything to lose, he chooses to stay alive by becoming an edgerunner.
+                </p>
+
+                <div class="pt-2 flex flex-wrap items-center gap-4">
+                    <button id="heroPlayBtn" onclick="" class="px-6 py-3 rounded-xl bg-gradient-to-r from-cyber-pink to-cyber-purple hover:from-cyber-pink/90 hover:to-cyber-purple/90 text-white font-bold flex items-center gap-2 shadow-neon-pink transform hover:-translate-y-0.5 transition-all">
+                        <i class="fa-solid fa-play text-lg"></i> Watch Now
+                    </button>
+                    <span id="heroGenre" class="text-xs font-semibold text-cyber-cyan border border-cyber-cyan/30 bg-cyber-cyan/10 px-3 py-1.5 rounded-lg">
+                        Sci-Fi / Action
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- CATEGORIES FILTER BAR -->
+        <div class="flex items-center justify-between gap-4 overflow-x-auto pb-2 pt-2 no-scrollbar">
+            <div id="categoryContainer" class="flex items-center gap-2">
+                <!-- Dynamically populated categories -->
+            </div>
+        </div>
+
+        <!-- MOVIES GRID SECTION -->
+        <section>
+            <div class="flex items-center justify-between mb-6">
+                <h2 id="sectionTitle" class="text-xl md:text-2xl font-bold font-cyber text-white flex items-center gap-2">
+                    <span class="w-2 h-6 bg-cyber-cyan rounded-full inline-block"></span>
+                    Home Movies
+                </h2>
+                <span id="movieCount" class="text-xs font-semibold text-slate-400 bg-slate-900 px-3 py-1 rounded-full border border-slate-800">0 Movies</span>
+            </div>
+
+            <!-- Grid Container -->
+            <div id="moviesGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
+                <!-- Movie cards populated dynamically -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden flex-col items-center justify-center py-16 text-center space-y-4">
+                <div class="w-16 h-16 rounded-full bg-slate-800/80 flex items-center justify-center text-slate-500 text-2xl">
+                    <i class="fa-solid fa-film"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-300">No movies found</h3>
+                <p class="text-sm text-slate-500 max-w-sm">No movies match your selected criteria or search term. Try adding movies in the Admin Panel!</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-slate-800/80 bg-cyber-dark/80 mt-12 py-8 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+            <p>© 2026 M_H_S movies Platform. Google Drive Cloud Media Streaming Hub.</p>
+            <div class="flex items-center gap-6">
+                <a href="#" class="hover:text-cyber-cyan transition-colors">Privacy Policy</a>
+                <a href="#" class="hover:text-cyber-cyan transition-colors">Terms of Service</a>
+                <button onclick="openAdminAuth()" class="hover:text-cyber-pink transition-colors">Admin Login</button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- VIDEO PLAYER MODAL -->
+    <div id="playerModal" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 transition-all duration-300">
+        <div class="relative w-full max-w-5xl bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl flex flex-col max-h-[95vh]">
+            
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between px-4 py-3 bg-slate-900/90 border-b border-slate-800">
+                <div class="flex items-center gap-3 overflow-hidden">
+                    <span class="px-2 py-0.5 text-xs font-bold bg-cyber-pink/20 text-cyber-pink rounded border border-cyber-pink/40">HD</span>
+                    <h3 id="modalMovieTitle" class="text-base md:text-lg font-bold text-white truncate font-cyber">Movie Title</h3>
+                </div>
+                <button onclick="closePlayerModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-rose-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Player Box -->
+            <div class="relative bg-black w-full aspect-video flex items-center justify-center overflow-hidden">
+                <!-- HTML5 Native Player -->
+                <video id="customVideoPlayer" class="w-full h-full object-contain hidden" controls crossorigin="anonymous" playsinline>
+                    <source id="videoSource" src="" type="video/mp4">
+                    <track id="subtitleTrack" kind="subtitles" srclang="en" label="English CC" default>
+                    Your browser does not support HTML5 video playback.
+                </video>
+
+                <!-- Embedded iFrame Player (for Google Drive Preview links) -->
+                <iframe id="iframePlayer" class="w-full h-full border-0 hidden" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+
+                <!-- Player Loading Spinner -->
+                <div id="playerLoader" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/80 gap-3">
+                    <div class="w-10 h-10 border-4 border-cyber-pink/30 border-t-cyber-cyan rounded-full animate-spin"></div>
+                    <p class="text-xs text-slate-400 font-cyber">Loading Stream...</p>
+                </div>
+            </div>
+
+            <!-- Modal Footer Info -->
+            <div class="p-4 bg-slate-900/60 overflow-y-auto space-y-2">
+                <div class="flex items-center justify-between text-xs text-slate-400">
+                    <div class="flex items-center gap-4">
+                        <span id="modalYear" class="text-slate-300">Year</span>
+                        <span id="modalGenre" class="text-cyber-cyan font-semibold">Genre</span>
+                        <span id="modalSubStatus" class="flex items-center gap-1 text-emerald-400">
+                            <i class="fa-solid fa-closed-captioning"></i> English Subtitles
+                        </span>
+                    </div>
+                    <span id="modalRating" class="text-yellow-400 font-bold"><i class="fa-solid fa-star"></i> 0.0</span>
+                </div>
+                <p id="modalDescription" class="text-sm text-slate-300 leading-relaxed">Movie description goes here.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN AUTHENTICATION MODAL -->
+    <div id="adminAuthModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-panel-glow w-full max-w-md rounded-2xl p-6 relative border border-cyber-cyan/40">
+            <button onclick="closeAdminAuth()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="text-center space-y-2 mb-6">
+                <div class="w-12 h-12 rounded-2xl bg-cyber-pink/20 text-cyber-pink border border-cyber-pink/40 flex items-center justify-center mx-auto text-xl">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <h3 class="text-xl font-bold font-cyber text-white">Admin Access</h3>
+                <p class="text-xs text-slate-400">Enter your secure password (`shifatopgojo12`) to manage movies</p>
+            </div>
+            <form onsubmit="verifyAdminPassword(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Password</label>
+                    <input type="password" id="adminAuthPass" required placeholder="Enter admin password..."
+                           class="w-full bg-slate-900/90 border border-slate-700 focus:border-cyber-cyan focus:ring-1 focus:ring-cyber-cyan text-sm text-white rounded-xl px-4 py-2.5 outline-none">
+                </div>
+                <p id="authErrorMsg" class="text-xs text-rose-500 hidden font-semibold text-center"><i class="fa-solid fa-circle-exclamation"></i> Incorrect password! Access denied.</p>
+                <button type="submit" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyber-cyan to-cyber-purple hover:opacity-90 text-slate-950 font-bold transition-all text-sm shadow-neon-cyan">
+                    Unlock Admin Panel
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ADMIN MANAGEMENT PANEL MODAL -->
+    <div id="adminPanelModal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-y-auto">
+        <div class="glass-panel w-full max-w-5xl rounded-2xl border border-slate-700 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden my-auto">
+            
+            <!-- Admin Header -->
+            <div class="flex items-center justify-between px-6 py-4 bg-slate-900 border-b border-slate-800">
+                <div class="flex items-center gap-3">
+                    <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <h2 class="text-lg font-bold text-white font-cyber flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-cyber-cyan"></i> M_H_S Admin Control Center
+                    </h2>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="promptResetDatabase()" class="px-3.5 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/40 font-semibold text-xs flex items-center gap-1.5 transition-all">
+                        <i class="fa-solid fa-arrows-rotate"></i> Reset All
+                    </button>
+                    <button onclick="openAddMovieModal()" class="px-3.5 py-1.5 rounded-xl bg-cyber-pink hover:bg-cyber-pink/80 text-white font-semibold text-xs flex items-center gap-2 shadow-neon-pink transition-all">
+                        <i class="fa-solid fa-plus"></i> Add Movie
+                    </button>
+                    <button onclick="closeAdminPanel()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Admin Body Grid / List -->
+            <div class="p-6 overflow-y-auto space-y-6">
+                
+                <!-- Google Drive Helper Banner -->
+                <div class="bg-slate-900/90 border border-cyber-cyan/30 rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <h4 class="text-sm font-bold text-cyber-cyan flex items-center gap-2">
+                            <i class="fa-brands fa-google-drive text-base"></i> Manage & Delete Movies Directly
+                        </h4>
+                        <p class="text-xs text-slate-300">
+                            Here you can add new Google Drive movies, toggle visibility on Home, edit details, or click the red <b>Delete</b> button to instantly remove a movie.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Section Title for Movie Table -->
+                <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                    <h3 class="text-sm font-bold text-white uppercase font-cyber tracking-wide flex items-center gap-2">
+                        <i class="fa-solid fa-film text-cyber-pink"></i> Movie Management & Deletion List
+                    </h3>
+                    <span id="adminTableCount" class="text-xs text-slate-400">Total: 0 movies</span>
+                </div>
+
+                <!-- Admin Movie Table -->
+                <div class="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/60">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="bg-slate-900/80 text-slate-400 font-cyber uppercase tracking-wider border-b border-slate-800">
+                            <tr>
+                                <th class="p-3">Poster</th>
+                                <th class="p-3">Movie Details</th>
+                                <th class="p-3">Genre</th>
+                                <th class="p-3 text-center">Subtitles</th>
+                                <th class="p-3 text-center">Show on Home</th>
+                                <th class="p-3 text-center">Delete / Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminMovieTableBody" class="divide-y divide-slate-800/60">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOM CONFIRMATION DELETE MODAL -->
+    <div id="confirmDeleteModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-panel-glow w-full max-w-md rounded-2xl p-6 relative border border-rose-500/50 space-y-4">
+            <div class="flex items-center gap-3 text-rose-500">
+                <div class="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <h3 class="text-lg font-bold font-cyber text-white" id="confirmModalTitle">Delete Movie?</h3>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed" id="confirmModalMsg">
+                Are you sure you want to permanently delete this movie from M_H_S movies database?
+            </p>
+            <div class="flex items-center justify-end gap-3 pt-2 border-t border-slate-800">
+                <button onclick="closeConfirmModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white text-xs font-semibold">
+                    Cancel
+                </button>
+                <button id="confirmModalActionBtn" class="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition-all shadow-lg">
+                    Delete Now
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD / EDIT MOVIE FORM MODAL -->
+    <div id="movieFormModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+        <div class="glass-panel w-full max-w-2xl rounded-2xl p-6 border border-slate-700 shadow-2xl relative my-auto">
+            <button onclick="closeMovieFormModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            
+            <h3 id="formModalTitle" class="text-xl font-bold font-cyber text-white mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-film text-cyber-pink"></i> Add New Movie
+            </h3>
+
+            <form onsubmit="handleMovieFormSubmit(event)" class="space-y-4">
+                <input type="hidden" id="formMovieId">
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Title -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Movie Title *</label>
+                        <input type="text" id="formTitle" required placeholder="e.g. Interstellar"
+                               class="w-full bg-slate-900 border border-slate-700 focus:border-cyber-cyan text-xs text-white rounded-xl px-3 py-2 outline-none">
+                    </div>
+                    <!-- Genre -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Genre *</label>
+                        <select id="formGenre" required class="w-full bg-slate-900 border border-slate-700 focus:border-cyber-cyan text-xs text-white rounded-xl px-3 py-2 outline-none">
+                            <option value="Action">Action</option>
+                            <option value="Sci-Fi">Sci-Fi</option>
+                            <option value="Anime">Anime</option>
+                            <option value="Drama">Drama</option>
+                            <option value="Horror">Horror</option>
+                            <option value="Comedy">Comedy</option>
+                            <option value="Thriller">Thriller</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Google Drive Link / ID -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Google Drive Link or File ID *</label>
+                    <input type="text" id="formDriveUrl" required placeholder="Paste Drive link e.g. https://drive.google.com/file/d/1A2B3C.../view or ID"
+                           class="w-full bg-slate-900 border border-slate-700 focus:border-cyber-cyan text-xs text-white rounded-xl px-3 py-2 outline-none">
+                    <span class="text-[10px] text-slate-500">Supports direct file IDs or standard shareable URLs.</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Poster URL -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Cover Poster Image URL *</label>
+                        <input type="url" id="formPoster" required placeholder="https://image-link.jpg"
+                               class="w-full bg-slate-900 border border-slate-700 focus:border-cyber-cyan text-xs text-white rounded-xl px-3 py-2 outline-none">
+                    </div>
+                    <!-- Subtitles VTT URL -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">English Subtitles URL (.vtt / .srt)</label>
+                        <input type="url" id="formSubtitle" placeholder="https://example.com/subtitles.vtt (Optional)"
+                               class="w-full bg-slate-900 border border-slate-700 focus:border-cyber-cyan text-xs text-white rounded-xl px-3 py-2 outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <!-- Rating -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Rating (1.0 - 10)</label>
+                        <input type="number" id="formRating" step="0.1" min="1" max="10" value="8.5"
+                               class="w-full bg-slate-900 border border-slate-700 focus:border-cyber-cyan text-xs text-white rounded-xl px-3 py-2 outline-none">
+                    </div>
+                    <!-- Release Year -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Release Year</label>
+                        <input type="number" id="formYear" value="2024"
+                               class="w-full bg-slate-900 border border-slate-700 focus:border-cyber-cyan text-xs text-white rounded-xl px-3 py-2 outline-none">
+                    </div>
+                    <!-- Show on Home Toggle -->
+                    <div class="col-span-2 sm:col-span-1 flex flex-col justify-center">
+                        <label class="flex items-center gap-2 cursor-pointer pt-3">
+                            <input type="checkbox" id="formShowHome" checked class="w-4 h-4 accent-cyber-pink rounded">
+                            <span class="text-xs font-semibold text-slate-200">Show on Home</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Description</label>
+                    <textarea id="formDescription" rows="3" placeholder="Brief movie summary..."
+                              class="w-full bg-slate-900 border border-slate-700 focus:border-cyber-cyan text-xs text-white rounded-xl px-3 py-2 outline-none resize-none"></textarea>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 pt-2 border-t border-slate-800">
+                    <button type="button" onclick="closeMovieFormModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700">Cancel</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-gradient-to-r from-cyber-pink to-cyber-purple text-white text-xs font-bold hover:opacity-90 shadow-neon-pink">
+                        Save Movie
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT APP LOGIC -->
+    <script>
+        // ADMIN ACCESS PASSWORD
+        const ADMIN_PASS = "shifatopgojo12";
+        
+        // DEFAULT INITIAL MOVIES PRESETS
+        const INITIAL_MOVIES = [
+            {
+                id: "m_1",
+                title: "Sintel - Open Movie",
+                genre: "Anime",
+                driveUrl: "1f33kS8iSnpFq1m3z_example1",
+                directSource: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+                poster: "https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1000&auto=format&fit=crop",
+                subtitle: "https://raw.githubusercontent.com/andreasronge/vtt-test/master/subtitles.vtt",
+                description: "A lonely young woman, Sintel, helps and befriends a baby dragon she names Scales. When Scales is abducted by an adult dragon, Sintel embarks on a dangerous quest.",
+                rating: 8.8,
+                year: 2023,
+                showHome: true
+            },
+            {
+                id: "m_2",
+                title: "Cyber City Chronicles",
+                genre: "Sci-Fi",
+                driveUrl: "1a2b3c4d5e6f_demo2",
+                directSource: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
+                poster: "https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=1000&auto=format&fit=crop",
+                subtitle: "",
+                description: "Set in a dystopian future, a group of warriors and scientists reunite in Rotterdam to rescue the world from futuristic robots.",
+                rating: 9.1,
+                year: 2024,
+                showHome: true
+            },
+            {
+                id: "m_3",
+                title: "Elephant Dream",
+                genre: "Action",
+                driveUrl: "1x9y8z7w6v5u_demo3",
+                directSource: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+                poster: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1000&auto=format&fit=crop",
+                subtitle: "",
+                description: "Two people explore a giant machine world that constantly rearranges itself according to their desires and fears.",
+                rating: 7.9,
+                year: 2022,
+                showHome: true
+            },
+            {
+                id: "m_4",
+                title: "Big Buck Bunny",
+                genre: "Comedy",
+                driveUrl: "1a9b8c7d6e5f_demo4",
+                directSource: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                poster: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1000&auto=format&fit=crop",
+                subtitle: "",
+                description: "A large and lovable rabbit deals with bullying forest creatures in a humorous, high-action forest showdown.",
+                rating: 8.4,
+                year: 2023,
+                showHome: true
+            }
+        ];
+
+        // STATE MANAGEMENT
+        let movies = [];
+        let selectedCategory = "All";
+        let searchQuery = "";
+        let isAdminLoggedIn = false;
+        let pendingDeleteId = null;
+
+        // INITIALIZATION
+        window.addEventListener('DOMContentLoaded', () => {
+            loadMovies();
+            renderCategories();
+            renderApp();
+        });
+
+        // TOAST NOTIFICATION HELPER
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto px-4 py-3 rounded-xl border shadow-xl text-xs font-bold flex items-center gap-2 transform translate-y-2 opacity-0 transition-all duration-300 ${
+                type === 'danger' 
+                ? 'bg-rose-950/90 border-rose-500/50 text-rose-200' 
+                : 'bg-emerald-950/90 border-emerald-500/50 text-emerald-200'
+            }`;
+            
+            toast.innerHTML = type === 'danger' 
+                ? `<i class="fa-solid fa-trash-can text-rose-400 text-sm"></i> <span>${message}</span>`
+                : `<i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i> <span>${message}</span>`;
+            
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', '-translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // LOAD MOVIES FROM LOCALSTORAGE
+        function loadMovies() {
+            const stored = localStorage.getItem('mhs_movies_db');
+            if (stored) {
+                try {
+                    movies = JSON.parse(stored);
+                } catch(e) {
+                    movies = INITIAL_MOVIES;
+                }
+            } else {
+                movies = INITIAL_MOVIES;
+                saveMoviesSilently();
+            }
+        }
+
+        function saveMoviesSilently() {
+            localStorage.setItem('mhs_movies_db', JSON.stringify(movies));
+        }
+
+        function saveMovies(toastMessage = null, toastType = 'success') {
+            localStorage.setItem('mhs_movies_db', JSON.stringify(movies));
+            renderApp();
+            if (isAdminLoggedIn) {
+                renderAdminTable();
+            }
+            if (toastMessage) {
+                showToast(toastMessage, toastType);
+            }
+        }
+
+        // CATEGORIES
+        const categories = ["All", "Action", "Sci-Fi", "Anime", "Drama", "Comedy", "Horror", "Thriller"];
+
+        function renderCategories() {
+            const container = document.getElementById('categoryContainer');
+            container.innerHTML = categories.map(cat => `
+                <button onclick="filterCategory('${cat}')" 
+                        class="px-4 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-300 ${
+                            selectedCategory === cat 
+                            ? 'bg-gradient-to-r from-cyber-cyan to-cyber-purple text-slate-950 font-bold shadow-neon-cyan' 
+                            : 'bg-slate-900/90 text-slate-300 hover:bg-slate-800 border border-slate-800'
+                        }">
+                    ${cat}
+                </button>
+            `).join('');
+        }
+
+        function filterCategory(cat) {
+            selectedCategory = cat;
+            renderCategories();
+            renderApp();
+        }
+
+        function handleSearch(isMobile = false) {
+            searchQuery = (isMobile 
+                ? document.getElementById('mobileSearchInput').value 
+                : document.getElementById('searchInput').value).toLowerCase().trim();
+            renderApp();
+        }
+
+        function toggleMobileSearch() {
+            const el = document.getElementById('mobileSearchContainer');
+            el.classList.toggle('hidden');
+        }
+
+        // HELPER: EXTRACT GOOGLE DRIVE FILE ID
+        function extractDriveId(input) {
+            if (!input) return "";
+            if (input.length < 25 && !input.includes('/')) return input;
+            const match = input.match(/\/d\/([a-zA-Z0-9_-]+)/) || input.match(/id=([a-zA-Z0-9_-]+)/);
+            return match ? match[1] : input;
+        }
+
+        // HELPER: GENERATE DRIVE STREAM URL
+        function getDriveStreamUrls(driveInput, directFallback) {
+            if (directFallback && directFallback.startsWith('http')) {
+                return { isDirect: true, streamUrl: directFallback };
+            }
+            const fileId = extractDriveId(driveInput);
+            if (!fileId) return { isDirect: false, streamUrl: "" };
+
+            const directUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+            const embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+
+            return { isDirect: true, streamUrl: directUrl, embedUrl: embedUrl };
+        }
+
+        // RENDER HOMEPAGE & MOVIES GRID
+        function renderApp() {
+            const grid = document.getElementById('moviesGrid');
+            const emptyState = document.getElementById('emptyState');
+            const sectionTitle = document.getElementById('sectionTitle');
+            const movieCount = document.getElementById('movieCount');
+
+            // Filter Movies
+            let filtered = movies.filter(m => {
+                const matchesCategory = (selectedCategory === "All") || (m.genre === selectedCategory);
+                const matchesSearch = searchQuery === "" || 
+                                     m.title.toLowerCase().includes(searchQuery) || 
+                                     m.genre.toLowerCase().includes(searchQuery);
+                const isHomeVisible = m.showHome !== false;
+                return matchesCategory && matchesSearch && isHomeVisible;
+            });
+
+            movieCount.textContent = `${filtered.length} Movie${filtered.length === 1 ? '' : 's'}`;
+            sectionTitle.innerHTML = `<span class="w-2 h-6 bg-cyber-cyan rounded-full inline-block"></span> ${selectedCategory} Movies`;
+
+            // Update Hero Banner with first/featured movie
+            if (filtered.length > 0) {
+                const hero = filtered[0];
+                document.getElementById('heroBanner').style.backgroundImage = `url('${hero.poster}')`;
+                document.getElementById('heroTitle').textContent = hero.title;
+                document.getElementById('heroDesc').textContent = hero.description || 'Experience high quality cloud movie streaming on M_H_S movies.';
+                document.getElementById('heroYear').textContent = hero.year || '2024';
+                document.getElementById('heroRating').innerHTML = `<i class="fa-solid fa-star"></i> ${hero.rating || '8.5'}`;
+                document.getElementById('heroGenre').textContent = hero.genre;
+                document.getElementById('heroPlayBtn').onclick = () => openPlayerModal(hero.id);
+            }
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                emptyState.classList.add('flex');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+                emptyState.classList.remove('flex');
+            }
+
+            // Render Movie Cards
+            grid.innerHTML = filtered.map(movie => `
+                <div class="group relative bg-cyber-card rounded-2xl overflow-hidden border border-slate-800/80 hover:border-cyber-cyan/50 transition-all duration-300 hover:shadow-neon-cyan flex flex-col">
+                    <!-- Image Poster Container -->
+                    <div class="relative aspect-[2/3] overflow-hidden bg-slate-900 cursor-pointer" onclick="openPlayerModal('${movie.id}')">
+                        <img src="${movie.poster}" alt="${movie.title}" 
+                             onerror="this.src='https://placehold.co/400x600/121220/00f3ff?text=No+Poster'" 
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        
+                        <!-- Overlay Hover Button -->
+                        <div class="absolute inset-0 bg-cyber-dark/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-r from-cyber-pink to-cyber-purple flex items-center justify-center text-white shadow-neon-pink transform scale-75 group-hover:scale-100 transition-transform">
+                                <i class="fa-solid fa-play text-lg ml-0.5"></i>
+                            </div>
+                        </div>
+
+                        <!-- Rating Badge -->
+                        <div class="absolute top-2 right-2 bg-slate-950/80 backdrop-blur-md px-2 py-0.5 rounded-md border border-slate-700/60 text-[10px] font-bold text-yellow-400 flex items-center gap-1">
+                            <i class="fa-solid fa-star"></i> ${movie.rating || '8.0'}
+                        </div>
+
+                        <!-- Subtitle CC Tag -->
+                        ${movie.subtitle ? `
+                            <div class="absolute top-2 left-2 bg-cyber-pink/80 text-white px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wide">
+                                CC
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <!-- Details -->
+                    <div class="p-3 flex-1 flex flex-col justify-between space-y-1">
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-100 truncate group-hover:text-cyber-cyan transition-colors">${movie.title}</h3>
+                            <div class="flex items-center justify-between text-[11px] text-slate-400 pt-0.5">
+                                <span>${movie.genre}</span>
+                                <span>${movie.year || '2024'}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // OPEN VIDEO PLAYER MODAL & HANDLE DRIVE MEDIA
+        function openPlayerModal(movieId) {
+            const movie = movies.find(m => m.id === movieId);
+            if (!movie) return;
+
+            const modal = document.getElementById('playerModal');
+            const videoPlayer = document.getElementById('customVideoPlayer');
+            const iframePlayer = document.getElementById('iframePlayer');
+            const videoSource = document.getElementById('videoSource');
+            const subtitleTrack = document.getElementById('subtitleTrack');
+            const loader = document.getElementById('playerLoader');
+
+            document.getElementById('modalMovieTitle').textContent = movie.title;
+            document.getElementById('modalYear').textContent = movie.year || '2024';
+            document.getElementById('modalGenre').textContent = movie.genre;
+            document.getElementById('modalRating').innerHTML = `<i class="fa-solid fa-star"></i> ${movie.rating || '8.0'}`;
+            document.getElementById('modalDescription').textContent = movie.description || 'No description provided for this movie.';
+
+            const subStatus = document.getElementById('modalSubStatus');
+            if (movie.subtitle) {
+                subStatus.classList.remove('hidden');
+            } else {
+                subStatus.classList.add('hidden');
+            }
+
+            modal.classList.remove('hidden');
+            loader.classList.remove('hidden');
+
+            const driveData = getDriveStreamUrls(movie.driveUrl, movie.directSource);
+
+            if (driveData.isDirect) {
+                iframePlayer.classList.add('hidden');
+                iframePlayer.src = "";
+
+                videoSource.src = driveData.streamUrl;
+                
+                if (movie.subtitle) {
+                    subtitleTrack.src = movie.subtitle;
+                    subtitleTrack.track.mode = "showing";
+                } else {
+                    subtitleTrack.src = "";
+                }
+
+                videoPlayer.load();
+                videoPlayer.classList.remove('hidden');
+
+                videoPlayer.oncanplay = () => {
+                    loader.classList.add('hidden');
+                };
+
+                videoPlayer.onerror = () => {
+                    if (driveData.embedUrl) {
+                        videoPlayer.classList.add('hidden');
+                        iframePlayer.src = driveData.embedUrl;
+                        iframePlayer.classList.remove('hidden');
+                    }
+                    loader.classList.add('hidden');
+                };
+
+            } else if (driveData.embedUrl) {
+                videoPlayer.classList.add('hidden');
+                iframePlayer.src = driveData.embedUrl;
+                iframePlayer.classList.remove('hidden');
+                loader.classList.add('hidden');
+            }
+        }
+
+        function closePlayerModal() {
+            const modal = document.getElementById('playerModal');
+            const videoPlayer = document.getElementById('customVideoPlayer');
+            const iframePlayer = document.getElementById('iframePlayer');
+
+            videoPlayer.pause();
+            videoPlayer.src = "";
+            iframePlayer.src = "";
+
+            modal.classList.add('hidden');
+        }
+
+        // ADMIN ACCESS CONTROLS
+        function openAdminAuth() {
+            if (isAdminLoggedIn) {
+                openAdminPanel();
+            } else {
+                document.getElementById('adminAuthModal').classList.remove('hidden');
+            }
+        }
+
+        function closeAdminAuth() {
+            document.getElementById('adminAuthModal').classList.add('hidden');
+            document.getElementById('authErrorMsg').classList.add('hidden');
+            document.getElementById('adminAuthPass').value = '';
+        }
+
+        function verifyAdminPassword(e) {
+            e.preventDefault();
+            const passInput = document.getElementById('adminAuthPass').value;
+            if (passInput === ADMIN_PASS) {
+                isAdminLoggedIn = true;
+                closeAdminAuth();
+                openAdminPanel();
+                showToast("Admin Panel Unlocked 🔓");
+            } else {
+                document.getElementById('authErrorMsg').classList.remove('hidden');
+            }
+        }
+
+        function openAdminPanel() {
+            document.getElementById('adminPanelModal').classList.remove('hidden');
+            renderAdminTable();
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('adminPanelModal').classList.add('hidden');
+        }
+
+        // RENDER ADMIN MOVIE LIST TABLE
+        function renderAdminTable() {
+            const tbody = document.getElementById('adminMovieTableBody');
+            document.getElementById('adminTableCount').textContent = `Total: ${movies.length} movies`;
+
+            if (movies.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="p-8 text-center text-slate-500">
+                            No movies available. Click "+ Add Movie" to create one.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = movies.map(movie => `
+                <tr class="hover:bg-slate-900/50 transition-colors">
+                    <td class="p-3">
+                        <img src="${movie.poster}" class="w-10 h-14 object-cover rounded-lg border border-slate-800" onerror="this.src='https://placehold.co/100x150/121220/ffffff?text=Poster'">
+                    </td>
+                    <td class="p-3">
+                        <div class="font-bold text-slate-100 text-sm">${movie.title}</div>
+                        <div class="text-[10px] text-slate-400 flex items-center gap-2">
+                            <span>Year: ${movie.year || '2024'}</span>
+                            <span>•</span>
+                            <span class="text-yellow-400">★ ${movie.rating}</span>
+                        </div>
+                    </td>
+                    <td class="p-3">
+                        <span class="px-2 py-0.5 rounded text-[10px] bg-slate-800 border border-slate-700 text-cyber-cyan font-semibold">
+                            ${movie.genre}
+                        </span>
+                    </td>
+                    <td class="p-3 text-center">
+                        ${movie.subtitle ? '<i class="fa-solid fa-check text-emerald-400 text-sm"></i>' : '<i class="fa-solid fa-minus text-slate-600"></i>'}
+                    </td>
+                    <td class="p-3 text-center">
+                        <button onclick="toggleMovieVisibility('${movie.id}')" class="px-3 py-1 rounded-full text-[10px] font-bold transition-all ${
+                            movie.showHome !== false ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
+                        }">
+                            ${movie.showHome !== false ? 'Visible' : 'Hidden'}
+                        </button>
+                    </td>
+                    <td class="p-3 text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            <button onclick="editMovie('${movie.id}')" title="Edit Movie" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-cyber-purple text-slate-300 hover:text-white flex items-center gap-1.5 transition-colors font-semibold">
+                                <i class="fa-solid fa-pen-to-square text-xs"></i> Edit
+                            </button>
+                            <button onclick="promptDeleteMovie('${movie.id}')" title="Delete Movie" class="px-2.5 py-1.5 rounded-lg bg-rose-600/20 hover:bg-rose-600 text-rose-400 hover:text-white border border-rose-500/40 flex items-center gap-1.5 transition-all font-semibold">
+                                <i class="fa-solid fa-trash-can text-xs"></i> Delete
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function toggleMovieVisibility(id) {
+            const m = movies.find(item => item.id === id);
+            if (m) {
+                m.showHome = (m.showHome === false) ? true : false;
+                saveMovies(`Visibility updated for "${m.title}"`);
+            }
+        }
+
+        // CONFIRM DELETE PROMPT (NO INVASIVE ALERTS)
+        function promptDeleteMovie(id) {
+            const movie = movies.find(m => m.id === id);
+            if (!movie) return;
+
+            pendingDeleteId = id;
+            document.getElementById('confirmModalTitle').textContent = `Delete "${movie.title}"?`;
+            document.getElementById('confirmModalMsg').textContent = `Are you sure you want to permanently remove "${movie.title}" from M_H_S movies database?`;
+
+            const actionBtn = document.getElementById('confirmModalActionBtn');
+            actionBtn.textContent = "Delete Movie";
+            actionBtn.className = "px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition-all shadow-lg";
+            actionBtn.onclick = () => executeDeleteMovie();
+
+            document.getElementById('confirmDeleteModal').classList.remove('hidden');
+        }
+
+        function executeDeleteMovie() {
+            if (!pendingDeleteId) return;
+            const deletedMovie = movies.find(m => m.id === pendingDeleteId);
+            const title = deletedMovie ? deletedMovie.title : "Movie";
+
+            movies = movies.filter(m => m.id !== pendingDeleteId);
+            pendingDeleteId = null;
+            closeConfirmModal();
+            
+            saveMovies(`Movie "${title}" deleted successfully! 🗑️`, 'danger');
+        }
+
+        function promptResetDatabase() {
+            document.getElementById('confirmModalTitle').textContent = "Reset All Movies?";
+            document.getElementById('confirmModalMsg').textContent = "Are you sure you want to reset all movies back to default factory presets?";
+
+            const actionBtn = document.getElementById('confirmModalActionBtn');
+            actionBtn.textContent = "Reset Database";
+            actionBtn.className = "px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition-all shadow-lg";
+            actionBtn.onclick = () => executeResetDatabase();
+
+            document.getElementById('confirmDeleteModal').classList.remove('hidden');
+        }
+
+        function executeResetDatabase() {
+            movies = [...INITIAL_MOVIES];
+            closeConfirmModal();
+            saveMovies("Database reset to defaults 🔄");
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmDeleteModal').classList.add('hidden');
+            pendingDeleteId = null;
+        }
+
+        // ADD / EDIT MOVIE FORM
+        function openAddMovieModal() {
+            document.getElementById('formModalTitle').innerHTML = `<i class="fa-solid fa-plus text-cyber-pink"></i> Add New Movie`;
+            document.getElementById('formMovieId').value = '';
+            document.getElementById('formTitle').value = '';
+            document.getElementById('formGenre').value = 'Action';
+            document.getElementById('formDriveUrl').value = '';
+            document.getElementById('formPoster').value = '';
+            document.getElementById('formSubtitle').value = '';
+            document.getElementById('formRating').value = '8.5';
+            document.getElementById('formYear').value = '2024';
+            document.getElementById('formShowHome').checked = true;
+            document.getElementById('formDescription').value = '';
+
+            document.getElementById('movieFormModal').classList.remove('hidden');
+        }
+
+        function editMovie(id) {
+            const m = movies.find(item => item.id === id);
+            if (!m) return;
+
+            document.getElementById('formModalTitle').innerHTML = `<i class="fa-solid fa-pen-to-square text-cyber-pink"></i> Edit Movie`;
+            document.getElementById('formMovieId').value = m.id;
+            document.getElementById('formTitle').value = m.title;
+            document.getElementById('formGenre').value = m.genre;
+            document.getElementById('formDriveUrl').value = m.driveUrl;
+            document.getElementById('formPoster').value = m.poster;
+            document.getElementById('formSubtitle').value = m.subtitle || '';
+            document.getElementById('formRating').value = m.rating || 8.0;
+            document.getElementById('formYear').value = m.year || 2024;
+            document.getElementById('formShowHome').checked = m.showHome !== false;
+            document.getElementById('formDescription').value = m.description || '';
+
+            document.getElementById('movieFormModal').classList.remove('hidden');
+        }
+
+        function closeMovieFormModal() {
+            document.getElementById('movieFormModal').classList.add('hidden');
+        }
+
+        function handleMovieFormSubmit(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('formMovieId').value;
+            const movieData = {
+                id: id || 'm_' + Date.now(),
+                title: document.getElementById('formTitle').value.trim(),
+                genre: document.getElementById('formGenre').value,
+                driveUrl: document.getElementById('formDriveUrl').value.trim(),
+                poster: document.getElementById('formPoster').value.trim(),
+                subtitle: document.getElementById('formSubtitle').value.trim(),
+                rating: parseFloat(document.getElementById('formRating').value) || 8.0,
+                year: parseInt(document.getElementById('formYear').value) || 2024,
+                showHome: document.getElementById('formShowHome').checked,
+                description: document.getElementById('formDescription').value.trim()
+            };
+
+            if (id) {
+                const idx = movies.findIndex(m => m.id === id);
+                if (idx !== -1) {
+                    movies[idx] = { ...movies[idx], ...movieData };
+                }
+                saveMovies(`Movie "${movieData.title}" updated successfully! ✏️`);
+            } else {
+                movies.unshift(movieData);
+                saveMovies(`Movie "${movieData.title}" added successfully! 🎬`);
+            }
+
+            closeMovieFormModal();
+        }
+    </script>
+</body>
+</html>
